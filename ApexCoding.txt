@@ -187,7 +187,19 @@ Force.com developer should format code.
             }
         ...
         }
-
+  
+  == Header Comments
+  
+    All files should begin with a c-style comment that lists the company, date, author, description, and
+    history:
+    
+        /*
+         * Company
+         * Date
+         * Author
+         * Description
+         * History
+         */
 
   == Class and Interface Declarations:
 
