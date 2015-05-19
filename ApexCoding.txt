@@ -316,110 +316,110 @@ These are the key coding principles and best practices that will ensure we write
     There should be as little logic in your code as possible. Reusing code in several places, 
     should be replaced with a single method and reduce the clutter in the code base.
     
-    //BAD EXAMPLE
-    public boolean isTrue(boolean myBool){
-        if(myBool){
-            return true;
-        }else{
-            return false;
-        }
-    }
+      //BAD EXAMPLE
+      public boolean isTrue(boolean myBool){
+          if(myBool){
+              return true;
+          }else{
+              return false;
+          }
+      }
+      
+      public Map<Id,Contact> getContactMap(){
+          Map<Id,Contact> contactMap = new Map<Id,Contact>();
+          
+          List<Contact> contacts = [Select Id From Contact];
+          if(contacts != null && contacts.size() > 0 && !contacts.isEmpty()){
+              for(Integer i=0; i < contacts.size(); i++){
+                  contactMap.put(contacts.get(i).Id,contacts.get(i));
+              }
+          }
+          return contactMap;
+      }
     
-    public Map<Id,Contact> getContactMap(){
-        Map<Id,Contact> contactMap = new Map<Id,Contact>();
-        
-        List<Contact> contacts = [Select Id From Contact];
-        if(contacts != null && contacts.size() > 0 && !contacts.isEmpty()){
-            for(Integer i=0; i < contacts.size(); i++){
-                contactMap.put(contacts.get(i).Id,contacts.get(i));
-            }
-        }
-        return contactMap;
-    }
-  
-    //GOOD Example
-    public boolean isTrue(boolean myBool){
-        return myBool;
-    }
-     
-    public Map<Id,Contact> getContactMap(){
-        return new Map<Id,Contact>([Select Id From Contact]);
-    }
+      //GOOD Example
+      public boolean isTrue(boolean myBool){
+          return myBool;
+      }
+       
+      public Map<Id,Contact> getContactMap(){
+          return new Map<Id,Contact>([Select Id From Contact]);
+      }
   
   ==Do not put queries in loops:
   
     One of the most stringent governor limits is a SOQL query limit of 100 queries in a transaction.
     To avoid this simply do not put queries in for loops.
     
-    //BAD example
-    List<Account> accList = new List<Account>([Select Id,Name From Account]);
-     
-    for(Account acc : accList){
-        Integer numWithEmail = 0;
-        for(Contact cont : [Select Id,Email From Contact Where AccountId = :acc.Id]){
-            if(!String.isEmpty(cont.Email)){
-                numWithEmail++;
-            }
-        }
-    }
-    
-    //GOOD Example
-    List<Account> accList = new List<Account>(
-        [Select 
-            Id
-            ,Name
-            ,(Select 
-                  Email
-              From
-                  Contacts
-            )
-         From Account]
-    );
-     
-    for(Account acc : accList){
-        Integer numWithEmail = 0;
-        for(Contact cont : acc.Contacts){
-            if(!String.isEmpty(cont.Email)){
-                numWithEmail++;
-            }
-        }
-    }
+      //BAD example
+      List<Account> accList = new List<Account>([Select Id,Name From Account]);
+       
+      for(Account acc : accList){
+          Integer numWithEmail = 0;
+          for(Contact cont : [Select Id,Email From Contact Where AccountId = :acc.Id]){
+              if(!String.isEmpty(cont.Email)){
+                  numWithEmail++;
+              }
+          }
+      }
+      
+      //GOOD Example
+      List<Account> accList = new List<Account>(
+          [Select 
+              Id
+              ,Name
+              ,(Select 
+                    Email
+                From
+                    Contacts
+              )
+           From Account]
+      );
+       
+      for(Account acc : accList){
+          Integer numWithEmail = 0;
+          for(Contact cont : acc.Contacts){
+              if(!String.isEmpty(cont.Email)){
+                  numWithEmail++;
+              }
+          }
+      }
     
   ==Use maps for queries:
   
     This is a fundamental technique and trick to use in order to make SOQL queries, DML transactions, and Apex triggers
     more efficient. You can get a Map from a list, without a For Loop. For exampe:
     
-    Map<Id, sObject> myAwesomeMap = new Map<Id,sObject>(List of sObjects or SOQL Query);
+      Map<Id, sObject> myAwesomeMap = new Map<Id,sObject>(List of sObjects or SOQL Query);
     
   ==Use relationships to reduce queries
   
     SOQL allows you to query for parent/children record information. 
     
-    List<Account> accList = new List<Account>(
-        [Select 
-            Id
-            ,Name
-            ,(Select 
-                  Email
-              From
-                  Contacts
-            )
-         From Account]
-    );
-     
-    List<Account> accountsToUpdate = new List<Account>(); 
-    for(Account acc : accList){
-        Integer numWithEmail = 0;
-        for(Contact cont : acc.Contacts){
-            if(!String.isEmpty(cont.Email)){
-                numWithEmail++;
-            }
-        }
-        acc.Contacts_With_Email_Address__c = numWithEmail;
-        accountsToUpdate.add(acc);
-    }
-    update accountsToUpdate;
+      List<Account> accList = new List<Account>(
+          [Select 
+              Id
+              ,Name
+              ,(Select 
+                    Email
+                From
+                    Contacts
+              )
+           From Account]
+      );
+       
+      List<Account> accountsToUpdate = new List<Account>(); 
+      for(Account acc : accList){
+          Integer numWithEmail = 0;
+          for(Contact cont : acc.Contacts){
+              if(!String.isEmpty(cont.Email)){
+                  numWithEmail++;
+              }
+          }
+          acc.Contacts_With_Email_Address__c = numWithEmail;
+          accountsToUpdate.add(acc);
+      }
+      update accountsToUpdate;
     
   ==Do not put DML in loops:
   
